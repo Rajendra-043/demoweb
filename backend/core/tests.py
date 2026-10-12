@@ -1,7 +1,9 @@
 """Smoke tests: every page and form the site exposes."""
 
 from datetime import timedelta
+from pathlib import Path
 
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -45,11 +47,52 @@ class SeedTests(TestCase):
                             f"{link} has an unusable target")
 
 
+class StaticFilesTests(TestCase):
+    """Guards against STATICFILES_DIRS going missing again.
+
+    Without it every page renders completely unstyled and /static/... 404s,
+    which is easy to miss until you look at the browser.
+    """
+
+    def test_css_is_discoverable(self):
+        from django.contrib.staticfiles import finders
+
+        self.assertIsNotNone(
+            finders.find("css/site.css"),
+            "css/site.css not found - check STATICFILES_DIRS in ojus/settings.py",
+        )
+
+    def test_background_image_is_discoverable(self):
+        from django.contrib.staticfiles import finders
+
+        self.assertIsNotNone(
+            finders.find("img/background.jpg"),
+            "img/background.jpg not found - check STATICFILES_DIRS in ojus/settings.py",
+        )
+
+    def test_css_is_linked_from_the_home_page(self):
+        from django.core.management import call_command
+
+        call_command("seed_site", verbosity=0)
+        # Assert on the markup rather than assertContains(), because the test
+        # client does not serve /static/ (that only happens under runserver).
+        response = self.client.get(reverse("core:home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"/static/css/site.css", response.content)
+
+    def test_staticfiles_dirs_points_at_project_static(self):
+        from django.conf import settings
+
+        self.assertIn(
+            settings.BASE_DIR / "static",
+            [Path(p).resolve() for p in settings.STATICFILES_DIRS],
+        )
+
+
 class PageTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        call = __import__("django.core.management", fromlist=["call_command"]).call_command
-        call("seed_site", verbosity=0)
+        call_command("seed_site", verbosity=0)
 
         cls.category, _ = EventCategory.objects.get_or_create(name="Keynote")
 
