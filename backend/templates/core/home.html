@@ -37,6 +37,18 @@
 {% block content %}
 <div class="page-body">
 
+    {% if needs_provisioning and DEBUG %}
+    <section class="section section--tight">
+        <div class="shell">
+            <div class="message message--error" style="position:static">
+                <strong>Site content is not set up on this database.</strong>
+                Run <code>python manage.py seed_site</code> (or <code>python manage.py migrate</code>)
+                to create the default pages, navigation and social links.
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
     {% include "core/includes/sections.html" %}
 
     {% if featured_events %}

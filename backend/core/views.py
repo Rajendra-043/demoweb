@@ -15,6 +15,7 @@ from .models import (
     FAQ,
     Organiser,
     Page,
+    PageSection,
     Registration,
     SiteSettings,
     Sponsor,
@@ -37,17 +38,25 @@ def _paginate(request, queryset, per_page=9):
 
 
 def home(request):
-    page = get_object_or_404(Page, slug="home", is_published=True)
+    """
+    Home page.
+
+    The home Page row drives the hero copy, but the page must survive a
+    database that has not been provisioned yet (fresh deploy, cleared DB).
+    If the row is missing we render the same template with no sections and let
+    the SiteSettings defaults supply the hero, so the site degrades to a
+    readable landing page instead of a 404.
+    """
+    page = Page.objects.filter(slug="home").first()
     context = {
         "page": page,
-        "sections": page.sections.filter(is_visible=True),
+        "sections": page.sections.filter(is_visible=True) if page else PageSection.objects.none(),
         "featured_events": _published(Event.objects.filter(is_featured=True))[:3],
-        "upcoming_events": _published(
-            Event.objects.all().order_by("start_at")
-        )[:3],
+        "upcoming_events": Event.objects.filter(is_published=True).order_by("start_at")[:3],
         "featured_workshops": _published(Workshop.objects.filter(is_featured=True))[:3],
         "featured_competitions": _published(Competition.objects.filter(is_featured=True))[:3],
         "sponsors": _published(Sponsor.objects.all()),
+        "needs_provisioning": page is None,
     }
     return render(request, "core/home.html", context)
 
