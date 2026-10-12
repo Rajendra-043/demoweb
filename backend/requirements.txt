@@ -6,3 +6,5 @@ Django>=5.2,<7.0
 # installed") for all 11 image fields if this is missing.
 Pillow>=10.0
 gunicorn
+
+whitenoise
