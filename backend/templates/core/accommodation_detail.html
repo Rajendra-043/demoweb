@@ -1,0 +1,42 @@
+{% extends "core/detail_base.html" %}
+
+{% block title %}{{ object.name }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ object.summary }}{% endblock %}
+
+{% block object_title %}{{ object.name }}{% endblock %}
+
+{% block back_url %}{% url 'core:page' slug='accommodation' %}{% endblock %}
+{% block back_label %}All accommodation{% endblock %}
+
+{% block object_meta %}
+<div class="event-meta">
+    {% if object.price_per_night %}<span>₹ {{ object.price_per_night }} / night</span>{% endif %}
+    {% if object.distance_from_campus %}<span>{{ object.distance_from_campus }} from campus</span>{% endif %}
+</div>
+{% endblock %}
+
+{% block object_body %}
+<div class="prose">{{ object.body|linebreaks }}</div>
+
+{% if object.amenity_list %}
+<h3 style="margin-top:30px">Amenities</h3>
+<div style="display:flex;flex-wrap:wrap;gap:9px;margin-top:6px">
+    {% for amenity in object.amenity_list %}
+    <span class="filter-chip">{{ amenity }}</span>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block object_specs %}
+<h3>Stay details</h3>
+<ul class="spec-list">
+    <li><span class="k">Type</span><span class="v">{{ object.get_kind_display }}</span></li>
+    {% if object.distance_from_campus %}<li><span class="k">Distance</span><span class="v">{{ object.distance_from_campus }}</span></li>{% endif %}
+    {% if object.price_per_night %}<li><span class="k">Per night</span><span class="v">₹ {{ object.price_per_night }}</span></li>{% endif %}
+    {% if object.capacity %}<li><span class="k">Capacity</span><span class="v">{{ object.capacity }}</span></li>{% endif %}
+    {% if object.check_in %}<li><span class="k">Check-in</span><span class="v">{{ object.check_in }}</span></li>{% endif %}
+    {% if object.check_out %}<li><span class="k">Check-out</span><span class="v">{{ object.check_out }}</span></li>{% endif %}
+    <li><span class="k">Status</span><span class="v">{% if object.is_available %}Available{% else %}Full{% endif %}</span></li>
+</ul>
+{% endblock %}

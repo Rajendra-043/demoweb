@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:page.description }}{% endblock %}
+
+{% block hero_content %}
+    {% if page.eyebrow %}<p class="eyebrow">{{ page.eyebrow }}</p>{% endif %}
+    <h1 class="title">{{ page.hero_heading }}</h1>
+    {% if page.meta_pair %}<div class="event-meta">{% for meta in page.meta_pair %}<span>{{ meta }}</span>{% endfor %}</div>{% endif %}
+    {% if page.description %}<p class="description">{{ page.description }}</p>{% endif %}
+    {% if page.tagline %}<p class="tagline">{{ page.tagline }}</p>{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+
+    {% include "core/includes/sections.html" %}
+
+    <section class="section section--tight">
+        <div class="shell">
+            {% if competitions %}
+            <div class="grid grid--3">
+                {% for competition in competitions %}
+                <article class="card">
+                    <div class="card-media {% if not competition.image %}card-media--empty{% endif %}">
+                        {% if competition.image %}
+                        <img src="{{ competition.image.url }}" alt="{{ competition.title }}">
+                        {% else %}<span>◈</span>{% endif %}
+                        {% if competition.category %}<span class="card-badge">{{ competition.category }}</span>{% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title"><a href="{{ competition.get_absolute_url }}">{{ competition.title }}</a></h3>
+                        {% if competition.summary %}<p class="card-text">{{ competition.summary|truncatechars:140 }}</p>{% endif %}
+                        <div class="card-meta">
+                            {% if competition.deadline %}<span>◷ Deadline {{ competition.deadline }}</span>{% endif %}
+                            {% if competition.prize %}<span>★ {{ competition.prize }}</span>{% endif %}
+                            {% if competition.team_size %}<span>⛶ {{ competition.team_size }}</span>{% endif %}
+                        </div>
+                        <div class="card-foot">
+                            <a class="button" href="{{ competition.get_absolute_url }}">RULES</a>
+                            {% if competition.registration_url %}
+                            <a class="button primary-button" href="{{ competition.registration_url }}">REGISTER</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-note">
+                <span>Competitions will be listed here once announced.</span>
+                <a class="button" href="/admin/core/competition/add/">Add a competition in the admin</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if is_paginated %}{% with page_obj=competitions %}{% include "core/includes/pagination.html" %}{% endwith %}{% endif %}
+
+</div>
+{% endblock %}

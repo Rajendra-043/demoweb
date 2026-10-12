@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:page.description }}{% endblock %}
+
+{% block hero_content %}
+    {% if page.eyebrow %}<p class="eyebrow">{{ page.eyebrow }}</p>{% endif %}
+    <h1 class="title">{{ page.hero_heading }}</h1>
+    {% if page.meta_pair %}<div class="event-meta">{% for meta in page.meta_pair %}<span>{{ meta }}</span>{% endfor %}</div>{% endif %}
+    {% if page.description %}<p class="description">{{ page.description }}</p>{% endif %}
+    {% if page.tagline %}<p class="tagline">{{ page.tagline }}</p>{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+
+    {% include "core/includes/sections.html" %}
+
+    <section class="section">
+        <div class="shell">
+            <div class="split">
+                <div>
+                    {% if page.body %}<div class="prose">{{ page.body|linebreaks }}</div>{% endif %}
+                    {% if organisers %}
+                    <h2 class="section-title" style="margin-top:44px;font-size:30px">The Team</h2>
+                    <div class="grid grid--3">
+                        {% for person in organisers %}
+                        <div class="person">
+                            <div class="person-avatar">
+                                {% if person.photo %}
+                                <img src="{{ person.photo.url }}" alt="{{ person.name }}">
+                                {% else %}{{ person.name|first|upper }}{% endif %}
+                            </div>
+                            <div class="person-name">{{ person.name }}</div>
+                            {% if person.role %}<div class="person-role">{{ person.role }}</div>{% endif %}
+                            {% if person.bio %}<p style="color:rgba(255,255,255,.7);font-size:13.5px;margin-top:10px">{{ person.bio|truncatechars:150 }}</p>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="placeholder" style="margin-top:30px">
+                        <div class="placeholder-title">Organiser profiles</div>
+                        <div class="placeholder-hint">Add people under <code>Organisers</code> in the admin.</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <aside class="detail-aside">
+                    <h3>Quick facts</h3>
+                    <ul class="spec-list">
+                        <li><span class="k">Organised by</span><span class="v">{{ site.organisation|default:"OJUS" }}</span></li>
+                        <li><span class="k">Edition</span><span class="v">{{ site.hero_meta_right|default:"—" }}</span></li>
+                        <li><span class="k">Dates</span><span class="v">{{ site.hero_meta_left|default:"—" }}</span></li>
+                        <li><span class="k">Email</span><span class="v">{{ site.contact_email|default:"—" }}</span></li>
+                        {% if site.contact_phone %}<li><span class="k">Phone</span><span class="v">{{ site.contact_phone }}</span></li>{% endif %}
+                    </ul>
+                    <a class="button primary-button" style="width:100%;margin-top:20px" href="{% url 'core:contact' %}">CONTACT</a>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    {% if sponsors %}
+    <section class="section section--alt">
+        <div class="shell">
+            <div class="section-head">
+                <span class="section-kicker">Partners</span>
+                <h2 class="section-title">Sponsors</h2>
+            </div>
+            <div class="grid grid--4">
+                {% for sponsor in sponsors %}
+                <div class="sponsor-logo">
+                    {% if sponsor.logo %}
+                    <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}">
+                    {% else %}<span style="font-family:Georgia,serif;font-style:italic">{{ sponsor.name }}</span>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if faqs %}
+    <section class="section">
+        <div class="shell shell--narrow">
+            <div class="section-head">
+                <span class="section-kicker">FAQ</span>
+                <h2 class="section-title">Questions &amp; Answers</h2>
+            </div>
+            {% for faq in faqs %}
+            <details class="faq-item" {% if forloop.first %}open{% endif %}>
+                <summary>{{ faq.question }}</summary>
+                <div class="faq-answer">{{ faq.answer|linebreaks }}</div>
+            </details>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+</div>
+{% endblock %}

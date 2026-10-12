@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Create account · {{ site.site_name }}{% endblock %}
+
+{% block hero_variant %}{% endblock %}
+{% block scroll_indicator %}{% endblock %}
+
+{% block hero_content %}
+    <p class="eyebrow">{{ site.site_name }}</p>
+    <h1 class="title" style="font-size:clamp(34px,5vw,60px)">Join us</h1>
+    <p class="description">Create an account to register for events and workshops.</p>
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+    <section class="section">
+        <div class="shell shell--narrow">
+            <div class="form-card">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="field-row">
+                        {% for field in form %}
+                        <div class="field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                            <ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="button primary-button">CREATE ACCOUNT</button>
+                </form>
+
+                <p style="text-align:center;margin-top:22px;color:rgba(255,255,255,.65);font-size:14px">
+                    Already registered? <a href="{% url 'core:signin' %}" style="color:var(--cyan)">Sign in</a>
+                </p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

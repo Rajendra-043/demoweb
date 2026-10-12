@@ -1,0 +1,161 @@
+{% comment %}
+Renders a list of PageSection rows. Every section renders even when it has no
+body/items yet -- it shows a dashed placeholder titled "Content space" so you
+can see where copy or cards will go before you have written them.
+{% endcomment %}
+
+{% for section in sections %}
+<section class="section {% if section.background_image %}section--image{% endif %}{% if forloop.counter|divisibleby:2 and not forloop.first %}section--alt{% endif %}"
+         {% if section.background_image %}style="background-image:url('{{ section.background_image.url }}')"{% endif %}>
+
+    <div class="shell">
+
+        {% if section.title or section.kicker or section.subtitle %}
+        <div class="section-head{% if section.align == 'left' %} section-head--left{% endif %}">
+            {% if section.kicker %}<span class="section-kicker">{{ section.kicker }}</span>{% endif %}
+            {% if section.title %}<h2 class="section-title">{{ section.title }}</h2>{% endif %}
+            {% if section.subtitle %}<p class="section-subtitle">{{ section.subtitle }}</p>{% endif %}
+        </div>
+        {% endif %}
+
+        {% if section.body %}
+        <div class="prose section-body{% if section.align == 'center' %} {% endif %}" style="margin-bottom:34px">
+            {{ section.body|linebreaks }}
+        </div>
+        {% endif %}
+
+        {% with items=section.items.all %}
+        {% if items %}
+
+            {% if section.layout == 'checklist' %}
+            <div class="checklist shell--flush" style="max-width:820px;margin-inline:auto">
+                {% for item in items %}
+                <div class="checklist-item">
+                    <span class="checklist-mark">{{ item.icon|default:"✓" }}</span>
+                    <div>
+                        <div class="checklist-title">{{ item.title }}</div>
+                        {% if item.subtitle %}
+                        <div class="card-subtitle" style="margin-bottom:4px">{{ item.subtitle }}</div>
+                        {% endif %}
+                        {% if item.body %}<div class="checklist-text">{{ item.body|linebreaksbr }}</div>{% endif %}
+                        {% if item.url and item.button_label %}
+                        <a class="button" style="margin-top:12px" href="{{ item.url }}">{{ item.button_label }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% elif section.layout == 'stats' %}
+            <div class="grid grid--{{ section.columns|default:4 }}">
+                {% for item in items %}
+                <div class="stat">
+                    <div class="stat-value">{{ item.title }}</div>
+                    <div class="stat-label">{{ item.subtitle|default:item.body|truncatechars:40 }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% elif section.layout == 'timeline' %}
+            <div class="timeline shell--flush" style="max-width:760px;margin-inline:auto">
+                {% for item in items %}
+                <div class="timeline-item">
+                    {% if item.meta_left or item.meta_right %}
+                    <div class="timeline-when">{{ item.meta_left }}{% if item.meta_left and item.meta_right %} · {% endif %}{{ item.meta_right }}</div>
+                    {% endif %}
+                    <div class="timeline-title">{{ item.title }}</div>
+                    {% if item.body %}<p style="color:rgba(255,255,255,.75);font-size:14.5px;margin-top:6px">{{ item.body|linebreaksbr }}</p>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            {% elif section.layout == 'gallery' %}
+            <div class="gallery">
+                {% for item in items %}
+                <figure class="gallery-item">
+                    {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}">{% endif %}
+                    {% if item.title %}<figcaption class="gallery-caption">{{ item.title }}</figcaption>{% endif %}
+                </figure>
+                {% endfor %}
+            </div>
+
+            {% elif section.layout == 'featured' %}
+            <div class="split">
+                <div class="featured-panel">
+                    <h3 style="font-family:Georgia,serif;font-style:italic;font-size:26px;margin-bottom:10px">{{ items.0.title }}</h3>
+                    {% if items.0.subtitle %}<p class="card-subtitle" style="margin-bottom:12px">{{ items.0.subtitle }}</p>{% endif %}
+                    {% if items.0.body %}<p style="color:rgba(255,255,255,.82);font-size:15px">{{ items.0.body|linebreaksbr }}</p>{% endif %}
+                    {% if items.0.button_label and items.0.url %}
+                    <a class="button primary-button" style="margin-top:18px" href="{{ items.0.url }}">{{ items.0.button_label }}</a>
+                    {% endif %}
+                </div>
+                <div>
+                    {% for item in items|slice:"1:" %}
+                    <div class="card card--plain" style="margin-bottom:16px;text-align:left">
+                        {% if item.icon %}<div class="card-icon">{{ item.icon }}</div>{% endif %}
+                        <div class="card-title">{{ item.title }}</div>
+                        {% if item.subtitle %}<p class="card-subtitle">{{ item.subtitle }}</p>{% endif %}
+                        {% if item.body %}<p class="card-text">{{ item.body|truncatechars:220 }}</p>{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% else %}
+            <div class="grid grid--{{ section.columns|default:3 }}">
+                {% for item in items %}
+                <article class="card card--plain">
+                    {% if item.icon %}<div class="card-icon">{{ item.icon }}</div>{% endif %}
+                    {% if item.subtitle %}<p class="card-subtitle">{{ item.subtitle }}</p>{% endif %}
+                    <h3 class="card-title">{{ item.title }}</h3>
+                    {% if item.body %}<p class="card-text">{{ item.body|linebreaksbr }}</p>{% endif %}
+                    {% if item.meta_left or item.meta_right %}
+                    <div class="card-meta">
+                        {% if item.meta_left %}<span>◷ {{ item.meta_left }}</span>{% endif %}
+                        {% if item.meta_right %}<span>⌖ {{ item.meta_right }}</span>{% endif %}
+                    </div>
+                    {% endif %}
+                    {% if item.button_label and item.url %}
+                    <a class="button" style="margin-top:16px" href="{{ item.url }}">{{ item.button_label }}</a>
+                    {% endif %}
+                </article>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        {% elif section.layout == 'cta' %}
+        <div class="cta">
+            {% if section.title %}<h2 class="section-title">{{ section.title }}</h2>{% endif %}
+            {% if section.body %}<p style="color:rgba(255,255,255,.85);max-width:620px;margin:0 auto 22px">{{ section.body|linebreaksbr }}</p>{% endif %}
+            {% if section.button_label and section.button_url %}
+            <a class="button primary-button" href="{{ section.button_url }}">{{ section.button_label }}</a>
+            {% endif %}
+        </div>
+
+        {% elif not section.body or section.layout != 'text' %}
+        <div class="placeholder">
+            <div class="placeholder-title">{{ section.title|default:"Content space" }}</div>
+            <div class="placeholder-hint">
+                {% if section.layout == 'text' %}
+                This block is empty &mdash; add copy for it under
+                {% else %}
+                No {% if section.layout == 'stats' %}figures{% elif section.layout == 'timeline' %}entries{% elif section.layout == 'gallery' %}images{% else %}cards{% endif %} yet &mdash; add them under
+                {% endif %}
+                <code>Pages &rsaquo; {{ section.page.title }} &rsaquo; {{ section.title }}</code>
+                in the admin.
+            </div>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% if section.button_label and section.button_url and section.layout != 'cta' %}
+        <div style="text-align:center;margin-top:30px">
+            <a class="button" href="{{ section.button_url }}">{{ section.button_label }}</a>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+{% empty %}
+<!-- No sections yet for this page. Add them in the admin under Pages. -->
+{% endfor %}

@@ -1,0 +1,12 @@
+{% comment %}Shared hero + "no content yet" scaffolding for listing pages.{% endcomment %}
+{% block hero_content %}
+    {% if page.eyebrow %}<p class="eyebrow">{{ page.eyebrow }}</p>{% endif %}
+    <h1 class="title">{{ page.hero_heading }}</h1>
+    {% if page.meta_pair %}
+    <div class="event-meta">
+        {% for meta in page.meta_pair %}<span>{{ meta }}</span>{% endfor %}
+    </div>
+    {% endif %}
+    {% if page.description %}<p class="description">{{ page.description }}</p>{% endif %}
+    {% if page.tagline %}<p class="tagline">{{ page.tagline }}</p>{% endif %}
+{% endblock %}

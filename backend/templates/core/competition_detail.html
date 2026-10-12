@@ -1,0 +1,36 @@
+{% extends "core/detail_base.html" %}
+
+{% block title %}{{ object.title }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ object.summary }}{% endblock %}
+
+{% block back_url %}{% url 'core:page' slug='competitions' %}{% endblock %}
+{% block back_label %}All competitions{% endblock %}
+
+{% block object_meta %}
+{% if object.deadline or object.prize %}
+<div class="event-meta">
+    {% if object.deadline %}<span>Deadline {{ object.deadline|date:"d M Y" }}</span>{% endif %}
+    {% if object.prize %}<span>{{ object.prize }}</span>{% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block object_body %}
+<div class="prose">{{ object.body|linebreaks }}</div>
+
+{% if object.rules %}
+<h3 style="margin-top:30px">Rules</h3>
+<div class="prose">{{ object.rules|linebreaks }}</div>
+{% endif %}
+{% endblock %}
+
+{% block object_specs %}
+<h3>Competition details</h3>
+<ul class="spec-list">
+    {% if object.category %}<li><span class="k">Category</span><span class="v">{{ object.category }}</span></li>{% endif %}
+    {% if object.deadline %}<li><span class="k">Deadline</span><span class="v">{{ object.deadline|date:"d M Y" }}</span></li>{% endif %}
+    {% if object.team_size %}<li><span class="k">Team size</span><span class="v">{{ object.team_size }}</span></li>{% endif %}
+    {% if object.venue %}<li><span class="k">Venue</span><span class="v">{{ object.venue }}</span></li>{% endif %}
+    {% if object.prize %}<li><span class="k">Prize</span><span class="v">{{ object.prize }}</span></li>{% endif %}
+</ul>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · {{ site.site_name }}{% endblock %}
+
+{% block hero_variant %}{% endblock %}
+{% block scroll_indicator %}{% endblock %}
+
+{% block hero_content %}
+    <p class="eyebrow">{{ site.site_name }}</p>
+    <h1 class="title" style="font-size:clamp(34px,5vw,60px)">Hello, {{ user.first_name|default:user.username }}</h1>
+    <p class="description">Your registrations and festival activity in one place.</p>
+    <div class="actions">
+        <a href="{% url 'core:page' slug='events' %}" class="button primary-button">BROWSE EVENTS</a>
+        <a href="{% url 'core:signout' %}" class="button">SIGN OUT</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+    <section class="section">
+        <div class="shell shell--narrow">
+
+            <div class="section-head section-head--left">
+                <span class="section-kicker">Registrations</span>
+                <h2 class="section-title" style="font-size:30px">Your sign-ups</h2>
+            </div>
+
+            {% if registrations %}
+            <div class="grid grid--2">
+                {% for reg in registrations %}
+                <article class="card card--plain" style="text-align:left">
+                    <p class="card-subtitle">{{ reg.get_interest_display }}</p>
+                    <h3 class="card-title">{{ reg.full_name }}</h3>
+                    <div class="card-meta">
+                        <span>✉ {{ reg.email }}</span>
+                        {% if reg.college %}<span>⌂ {{ reg.college }}</span>{% endif %}
+                        <span>◷ {{ reg.created_at|date:"d M Y" }}</span>
+                    </div>
+                    {% if reg.notes %}
+                    <p class="card-text" style="margin-top:10px">{{ reg.notes }}</p>
+                    {% endif %}
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-note">
+                <span>You have not registered for anything yet.</span>
+                <a class="button primary-button" href="{% url 'core:page' slug='events' %}">Explore events</a>
+            </div>
+            {% endif %}
+
+            <h2 class="section-title" style="font-size:30px;margin:56px 0 22px">Register for something</h2>
+            <div class="form-card">
+                <form method="post" action="{% url 'core:register' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'core:dashboard' %}">
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="reg-name">Full name</label>
+                            <input type="text" id="reg-name" name="full_name" value="{{ user.get_full_name }}" required>
+                        </div>
+                        <div class="field">
+                            <label for="reg-email">Email</label>
+                            <input type="email" id="reg-email" name="email" value="{{ user.email }}" required>
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="reg-phone">Phone</label>
+                            <input type="text" id="reg-phone" name="phone">
+                        </div>
+                        <div class="field">
+                            <label for="reg-college">Institute</label>
+                            <input type="text" id="reg-college" name="college">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="reg-interest">Interested in</label>
+                        <select id="reg-interest" name="interest">
+                            <option value="general">General pass</option>
+                            <option value="event">Event</option>
+                            <option value="workshop">Workshop</option>
+                            <option value="competition">Competition</option>
+                            <option value="accommodation">Accommodation</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="reg-notes">Notes</label>
+                        <textarea id="reg-notes" name="notes" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="button primary-button">SUBMIT REGISTRATION</button>
+                </form>
+            </div>
+
+        </div>
+    </section>
+</div>
+{% endblock %}

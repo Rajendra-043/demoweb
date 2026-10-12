@@ -1,0 +1,7 @@
+# Install with:  python -m pip install -r requirements.txt
+Django>=5.2,<7.0
+
+# REQUIRED - the models use ImageField, and Django's system check
+# raises fields.E210 ("Cannot use ImageField because Pillow is not
+# installed") for all 11 image fields if this is missing.
+Pillow>=10.0

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OJUS — Cinematic Glass UI</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyan: #00eaff;
+            --purple: #a855f7;
+            --glass: rgba(12, 15, 30, 0.62);
+            --border: rgba(210, 235, 255, 0.25);
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: #080b18;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        /* CINEMATIC BACKGROUND */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            isolation: isolate;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 130px 140px 100px;
+
+            background:
+                linear-gradient(90deg,
+                    rgba(5, 8, 22, 0.88),
+                    rgba(8, 8, 22, 0.55),
+                    rgba(5, 8, 22, 0.78)),
+                linear-gradient(0deg,
+                    rgba(5, 8, 22, 0.82),
+                    rgba(5, 8, 22, 0.18) 55%),
+                url("background.jpg") center / cover no-repeat,
+                #11152a;
+        }
+
+        /* AURORA LIGHTING */
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+
+            background:
+                radial-gradient(ellipse at 15% 25%,
+                    rgba(0, 180, 255, 0.17),
+                    transparent 40%),
+                radial-gradient(ellipse at 85% 20%,
+                    rgba(150, 45, 255, 0.22),
+                    transparent 40%),
+                radial-gradient(ellipse at 50% 100%,
+                    rgba(0, 100, 255, 0.16),
+                    transparent 45%);
+        }
+
+        /* TOP HEADER */
+        .header {
+            position: absolute;
+            top: 22px;
+            left: 30px;
+            right: 30px;
+            z-index: 10;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+        }
+
+        .logo {
+            font-size: 38px;
+            font-weight: 900;
+            font-style: italic;
+            color: white;
+            text-shadow: 0 0 18px rgba(0, 234, 255, 0.4);
+        }
+
+        /* GLASS NAVIGATION */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(15px, 3vw, 45px);
+            padding: 20px 32px;
+
+            background: rgba(10, 12, 28, 0.58);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            white-space: nowrap;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+
+        .navbar a:hover {
+            color: var(--cyan);
+            text-shadow: 0 0 12px var(--cyan);
+        }
+
+        /* BUTTONS */
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px 23px;
+
+            color: white;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+
+            background: rgba(16, 20, 42, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            border-color: var(--cyan);
+            box-shadow: 0 0 22px rgba(0, 234, 255, 0.22);
+        }
+
+        .sign-in {
+            white-space: nowrap;
+        }
+
+        .primary-button {
+            background: linear-gradient(110deg,
+                    rgba(0, 234, 255, 0.14),
+                    rgba(168, 85, 247, 0.18));
+
+            border-color: var(--cyan);
+
+            box-shadow:
+                0 0 16px rgba(0, 234, 255, 0.13),
+                inset 0 0 12px rgba(168, 85, 247, 0.08);
+        }
+
+        /* FLOATING SIDE PANELS */
+        .side-panel {
+            position: fixed;
+            top: 50%;
+            z-index: 20;
+
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+
+            transform: translateY(-50%);
+        }
+
+        .left-panel {
+            left: 18px;
+        }
+
+        .right-panel {
+            right: 18px;
+        }
+
+        .side-panel a {
+            min-width: 86px;
+            min-height: 76px;
+            padding: 12px 8px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+
+            color: white;
+            text-decoration: none;
+            font-size: 11px;
+
+            border-radius: 12px;
+            transition: 0.3s ease;
+        }
+
+        .side-panel a:hover,
+        .side-panel a.active {
+            color: var(--cyan);
+            background: rgba(0, 234, 255, 0.09);
+            text-shadow: 0 0 12px rgba(0, 234, 255, 0.5);
+        }
+
+        .side-icon {
+            font-size: 25px;
+            line-height: 1;
+        }
+
+        /* CENTER CONTENT */
+        .content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 720px;
+            text-align: center;
+            animation: fade-in 1s ease both;
+        }
+
+        .eyebrow {
+            color: rgba(255, 255, 255, 0.82);
+            font-family: Georgia, serif;
+            font-size: 17px;
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+        }
+
+        .title {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(48px, 7vw, 94px);
+            font-weight: 700;
+            font-style: italic;
+            line-height: 1;
+            letter-spacing: -3px;
+
+            background: linear-gradient(135deg,
+                    #ffffff 15%,
+                    #8beaff 45%,
+                    #c6b5ff 65%,
+                    #ffffff 85%);
+
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+
+            filter: drop-shadow(0 5px 20px rgba(0, 0, 0, 0.7));
+        }
+
+        .event-meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+
+            margin: 20px 0 12px;
+
+            font-family: Georgia, serif;
+            font-size: clamp(15px, 2vw, 22px);
+        }
+
+        .description {
+            margin: 16px auto 8px;
+            max-width: 550px;
+
+            color: rgba(255, 255, 255, 0.9);
+            font-family: Georgia, serif;
+            font-size: clamp(12px, 1.5vw, 17px);
+            line-height: 1.8;
+            letter-spacing: 1.5px;
+        }
+
+        .tagline {
+            color: #d8d4ed;
+            font-family: Georgia, serif;
+            font-style: italic;
+            font-size: clamp(13px, 1.5vw, 18px);
+            letter-spacing: 1px;
+            margin-bottom: 28px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 28px;
+            left: 50%;
+            z-index: 2;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 50px;
+            background: linear-gradient(white,
+                    var(--cyan),
+                    transparent);
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* TABLETS */
+        @media (max-width: 1050px) {
+            .header {
+                left: 20px;
+                right: 20px;
+            }
+
+            .navbar {
+                gap: 15px;
+                padding: 17px;
+            }
+
+            .navbar a {
+                font-size: 10px;
+            }
+
+            .left-panel {
+                left: 8px;
+            }
+
+            .right-panel {
+                right: 8px;
+            }
+
+            .side-panel a {
+                min-width: 65px;
+                min-height: 65px;
+                font-size: 10px;
+            }
+
+            .hero {
+                padding-left: 95px;
+                padding-right: 95px;
+            }
+        }
+
+        /* MOBILE */
+        @media (max-width: 700px) {
+            .hero {
+                min-height: 100svh;
+                padding: 140px 18px 100px;
+            }
+
+            .header {
+                top: 15px;
+                left: 15px;
+                right: 15px;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .logo {
+                font-size: 30px;
+            }
+
+            .navbar {
+                order: 3;
+                width: 100%;
+                gap: 0;
+                justify-content: space-around;
+                padding: 14px 8px;
+            }
+
+            .navbar a {
+                font-size: 9px;
+                letter-spacing: 0;
+            }
+
+            .sign-in {
+                padding: 11px 13px;
+                font-size: 10px;
+            }
+
+            .side-panel {
+                position: absolute;
+                top: auto;
+                bottom: 15px;
+                transform: none;
+                flex-direction: row;
+                border-radius: 12px;
+            }
+
+            .left-panel {
+                left: 12px;
+                right: 12px;
+                justify-content: space-around;
+            }
+
+            .right-panel {
+                display: none;
+            }
+
+            .side-panel a {
+                min-width: 0;
+                min-height: 55px;
+                flex: 1;
+                padding: 8px 4px;
+                font-size: 9px;
+                gap: 5px;
+            }
+
+            .side-icon {
+                font-size: 20px;
+            }
+
+            .title {
+                letter-spacing: -1px;
+            }
+
+            .event-meta {
+                gap: 12px;
+            }
+
+            .scroll-indicator {
+                display: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="hero">
+
+        <header class="header">
+            <div class="logo">OJ<sup style="font-size: 10px;">™</sup></div>
+
+            <nav class="navbar">
+                <a href="accommodation.html">Accommodation</a>
+                <a href="workshops.html">Workshops</a>
+                <a href="competitions.html">Competitions</a>
+                <a href="ignite.html">Ignite</a>
+            </nav>
+
+            <a href="signin.html" class="button sign-in">↗ SIGN IN</a>
+        </header>
+
+        <aside class="side-panel left-panel">
+            <a href="index.html" class="active">
+                <span class="side-icon">⌂</span>
+                <span>Home</span>
+            </a>
+            <a href="events.html">
+                <span class="side-icon">▦</span>
+                <span>Events</span>
+            </a>
+            <a href="ces.html">
+                <span class="side-icon">◈</span>
+                <span>CES</span>
+            </a>
+            <a href="contact.html">
+                <span class="side-icon">♧</span>
+                <span>Contact Us</span>
+            </a>
+            <a href="about.html">
+                <span class="side-icon">ⓘ</span>
+                <span>About Us</span>
+            </a>
+        </aside>
+
+        <aside class="side-panel right-panel">
+            <a href="https://instagram.com" aria-label="Instagram">
+                <span class="side-icon">◎</span>
+            </a>
+            <a href="https://x.com" aria-label="X">
+                <span class="side-icon">𝕏</span>
+            </a>
+            <a href="https://linkedin.com" aria-label="LinkedIn">
+                <span class="side-icon">in</span>
+            </a>
+            <a href="https://facebook.com" aria-label="Facebook">
+                <span class="side-icon">f</span>
+            </a>
+            <a href="https://youtube.com" aria-label="YouTube">
+                <span class="side-icon">▶</span>
+            </a>
+        </aside>
+
+        <main class="content" id="home">
+            <p class="eyebrow">BIT Durg's</p>
+
+            <h1 class="title">OJUS</h1>
+
+            <div class="event-meta">
+                <span>16ᵗʰ – 18ᵗʰ DECEMBER</span>
+                <span>30ᵗʰ EDITION</span>
+            </div>
+
+            <p class="description">
+                ASIA'S LARGEST SCIENCE &amp; TECHNOLOGY FESTIVAL
+            </p>
+
+            <p class="tagline">— An Aetherial Renaissance —</p>
+
+            <div class="actions">
+                <a href="events.html" class="button primary-button">
+                    EXPLORE OJUS &nbsp; →
+                </a>
+
+                <a href="trailer.html" class="button">
+                    ▶ &nbsp; WATCH TRAILER
+                </a>
+            </div>
+        </main>
+
+        <div class="scroll-indicator">
+            <span>SCROLL</span>
+            <div class="scroll-line"></div>
+        </div>
+
+    </section>
+</body>
+
+</html>

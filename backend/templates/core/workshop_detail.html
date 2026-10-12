@@ -1,0 +1,35 @@
+{% extends "core/detail_base.html" %}
+
+{% block title %}{{ object.title }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ object.summary }}{% endblock %}
+
+{% block back_url %}{% url 'core:page' slug='workshops' %}{% endblock %}
+{% block back_label %}All workshops{% endblock %}
+
+{% block object_meta %}
+{% if object.date or object.venue %}
+<div class="event-meta">
+    {% if object.date %}<span>{{ object.date|date:"d M Y" }}</span>{% endif %}
+    {% if object.venue %}<span>{{ object.venue }}</span>{% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block object_body %}
+<div class="prose">{{ object.body|linebreaks }}</div>
+{% endblock %}
+
+{% block object_specs %}
+<h3>Workshop details</h3>
+<ul class="spec-list">
+    {% if object.track %}<li><span class="k">Track</span><span class="v">{{ object.track }}</span></li>{% endif %}
+    {% if object.instructor %}<li><span class="k">Instructor</span><span class="v">{{ object.instructor }}</span></li>{% endif %}
+    {% if object.date %}<li><span class="k">Date</span><span class="v">{{ object.date|date:"d M Y" }}</span></li>{% endif %}
+    {% if object.time_slot %}<li><span class="k">Time</span><span class="v">{{ object.time_slot }}</span></li>{% endif %}
+    {% if object.duration %}<li><span class="k">Duration</span><span class="v">{{ object.duration }}</span></li>{% endif %}
+    {% if object.venue %}<li><span class="k">Venue</span><span class="v">{{ object.venue }}</span></li>{% endif %}
+    {% if object.difficulty %}<li><span class="k">Level</span><span class="v">{{ object.difficulty }}</span></li>{% endif %}
+    {% if object.seats %}<li><span class="k">Seats</span><span class="v">{{ object.seats }}</span></li>{% endif %}
+    {% if object.price %}<li><span class="k">Fee</span><span class="v">₹ {{ object.price }}</span></li>{% endif %}
+</ul>
+{% endblock %}

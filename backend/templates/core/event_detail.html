@@ -1,0 +1,31 @@
+{% extends "core/detail_base.html" %}
+
+{% block title %}{{ object.title }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ object.summary }}{% endblock %}
+
+{% block back_url %}{% url 'core:page' slug='events' %}{% endblock %}
+{% block back_label %}All events{% endblock %}
+
+{% block object_meta %}
+{% if object.start_at %}
+<div class="event-meta">
+    <span>{{ object.start_at|date:"D d M · H:i" }}</span>
+    {% if object.end_at %}<span>→ {{ object.end_at|date:"D d M · H:i" }}</span>{% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block object_body %}
+<div class="prose">{{ object.body|linebreaks|default:"<p>Details for this event will be published shortly.</p>"|safe }}</div>
+{% endblock %}
+
+{% block object_specs %}
+<h3>Event details</h3>
+<ul class="spec-list">
+    {% if object.category %}<li><span class="k">Category</span><span class="v">{{ object.category.name }}</span></li>{% endif %}
+    {% if object.start_at %}<li><span class="k">Starts</span><span class="v">{{ object.start_at|date:"d M Y, H:i" }}</span></li>{% endif %}
+    {% if object.end_at %}<li><span class="k">Ends</span><span class="v">{{ object.end_at|date:"d M Y, H:i" }}</span></li>{% endif %}
+    {% if object.venue %}<li><span class="k">Venue</span><span class="v">{{ object.venue }}</span></li>{% endif %}
+    {% if object.registration_url %}<li><span class="k">Registration</span><span class="v">Open</span></li>{% endif %}
+</ul>
+{% endblock %}

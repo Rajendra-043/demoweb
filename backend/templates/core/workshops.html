@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:page.description }}{% endblock %}
+
+{% block hero_content %}
+    {% if page.eyebrow %}<p class="eyebrow">{{ page.eyebrow }}</p>{% endif %}
+    <h1 class="title">{{ page.hero_heading }}</h1>
+    {% if page.meta_pair %}<div class="event-meta">{% for meta in page.meta_pair %}<span>{{ meta }}</span>{% endfor %}</div>{% endif %}
+    {% if page.description %}<p class="description">{{ page.description }}</p>{% endif %}
+    {% if page.tagline %}<p class="tagline">{{ page.tagline }}</p>{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+
+    {% include "core/includes/sections.html" %}
+
+    <section class="section section--tight">
+        <div class="shell">
+            {% if workshops %}
+            <div class="grid grid--3">
+                {% for workshop in workshops %}
+                <article class="card">
+                    <div class="card-media {% if not workshop.image %}card-media--empty{% endif %}">
+                        {% if workshop.image %}
+                        <img src="{{ workshop.image.url }}" alt="{{ workshop.title }}">
+                        {% else %}<span>◉</span>{% endif %}
+                        {% if workshop.track %}<span class="card-badge">{{ workshop.track }}</span>{% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title"><a href="{{ workshop.get_absolute_url }}">{{ workshop.title }}</a></h3>
+                        {% if workshop.summary %}<p class="card-text">{{ workshop.summary|truncatechars:140 }}</p>{% endif %}
+                        <div class="card-meta">
+                            {% if workshop.date %}<span>◷ {{ workshop.date }}</span>{% endif %}
+                            {% if workshop.venue %}<span>⌖ {{ workshop.venue }}</span>{% endif %}
+                            {% if workshop.price %}<span>₹ {{ workshop.price }}</span>{% endif %}
+                        </div>
+                        {% if workshop.seats %}<div class="card-meta"><span>◔ {{ workshop.seats }} seats</span></div>{% endif %}
+                        <div class="card-foot">
+                            <a class="button" href="{{ workshop.get_absolute_url }}">DETAILS</a>
+                            {% if workshop.registration_url %}
+                            <a class="button primary-button" href="{{ workshop.registration_url }}">BOOK</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-note">
+                <span>Workshops will be announced here — the grid is ready.</span>
+                <a class="button" href="/admin/core/workshop/add/">Add a workshop in the admin</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if is_paginated %}{% with page_obj=workshops %}{% include "core/includes/pagination.html" %}{% endwith %}{% endif %}
+
+</div>
+{% endblock %}

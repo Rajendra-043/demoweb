@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:page.description }}{% endblock %}
+
+{% block hero_content %}
+    {% if page.eyebrow %}<p class="eyebrow">{{ page.eyebrow }}</p>{% endif %}
+    <h1 class="title">{{ page.hero_heading }}</h1>
+    {% if page.meta_pair %}
+    <div class="event-meta">
+        {% for meta in page.meta_pair %}<span>{{ meta }}</span>{% endfor %}
+    </div>
+    {% endif %}
+    {% if page.description %}<p class="description">{{ page.description }}</p>{% endif %}
+    {% if page.tagline %}<p class="tagline">{{ page.tagline }}</p>{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+
+    {% include "core/includes/sections.html" %}
+
+    <section class="section section--tight">
+        <div class="shell">
+            {% if events %}
+            <div class="grid grid--3">
+                {% for event in events %}
+                {% include "core/includes/event_card.html" %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-note">
+                <span>No events have been published yet — this space is ready for them.</span>
+                <a class="button" href="/admin/core/event/add/">Add an event in the admin</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if is_paginated %}{% with page_obj=events %}{% include "core/includes/pagination.html" %}{% endwith %}{% endif %}
+
+    <section class="section section--alt">
+        <div class="shell">
+            <div class="cta">
+                <h2 class="section-title">Questions about an event?</h2>
+                <p style="color:rgba(255,255,255,.85);max-width:620px;margin:0 auto 22px">
+                    Send us a note and the {{ site.organisation|default:"OJUS" }} team will get back to you.
+                </p>
+                <a class="button primary-button" href="{% url 'core:contact' %}">CONTACT THE TEAM</a>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

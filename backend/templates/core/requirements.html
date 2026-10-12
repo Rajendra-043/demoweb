@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title|default:"Requirements" }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:page.description }}{% endblock %}
+
+{% block hero_content %}
+    {% if page.eyebrow %}<p class="eyebrow">{{ page.eyebrow }}</p>{% endif %}
+    <h1 class="title">{{ page.hero_heading }}</h1>
+    {% if page.meta_pair %}<div class="event-meta">{% for meta in page.meta_pair %}<span>{{ meta }}</span>{% endfor %}</div>{% endif %}
+    {% if page.description %}<p class="description">{{ page.description }}</p>{% endif %}
+    {% if page.tagline %}<p class="tagline">{{ page.tagline }}</p>{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+
+    {% if page.hero_image %}
+    <section class="section section--tight">
+        <div class="shell">
+            <img class="detail-hero" src="{{ page.hero_image.url }}" alt="{{ page.title }}">
+        </div>
+    </section>
+    {% endif %}
+
+    {% if page.body %}
+    <section class="section section--tight">
+        <div class="shell shell--narrow">
+            <div class="prose">{{ page.body|linebreaks }}</div>
+        </div>
+    </section>
+    {% endif %}
+
+    {% include "core/includes/sections.html" %}
+
+    {% if not sections and not page.body %}
+    <section class="section">
+        <div class="shell">
+            <div class="empty-note">
+                <span>This requirements page is live but has no content yet.</span>
+                {% if page %}<a class="button" href="/admin/core/page/{{ page.pk }}/change/">Add content in the admin</a>{% endif %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="section section--alt">
+        <div class="shell">
+            <div class="cta">
+                <h2 class="section-title">Still unsure about something?</h2>
+                <p style="color:rgba(255,255,255,.85);max-width:640px;margin:0 auto 22px">
+                    Eligibility rules, travel documents and accommodation queries — the
+                    {{ site.organisation|default:"OJUS" }} team answers all of them.
+                </p>
+                <div class="actions" style="justify-content:center">
+                    <a class="button primary-button" href="{% url 'core:contact' %}">ASK A QUESTION</a>
+                    <a class="button" href="{% url 'core:page' slug='events' %}">BROWSE EVENTS</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

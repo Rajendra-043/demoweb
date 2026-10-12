@@ -1,0 +1,198 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site.site_name }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ site.meta_description|default:site.hero_description }}{% endblock %}">
+    {% if site.meta_keywords %}<meta name="keywords" content="{{ site.meta_keywords }}">{% endif %}
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message message--{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <section class="hero {% block hero_variant %}hero--compact{% endblock %}"
+        style="--hero-image: {% if site.background_image %}url('{{ site.background_image.url }}'){% else %}url('{% static 'img/background.jpg' %}'){% endif %}; --hero-fallback: {{ site.background_overlay }};">
+
+        <header class="header">
+            <a class="logo" href="{% url 'core:home' %}">{{ site.logo_text }}<sup>{{ site.logo_superscript }}</sup></a>
+
+            <nav class="navbar">
+                {% for link in header_links %}
+                <a href="{{ link.target }}"{% if link.open_in_new_tab %} target="_blank" rel="noopener"{% endif %}
+                   class="{% if request.path == link.target %}active{% endif %}">{{ link.label }}</a>
+                {% empty %}
+                <span style="opacity:.4;font-size:11px;letter-spacing:1.2px">ADD LINKS IN ADMIN &rarr; NAVIGATION</span>
+                {% endfor %}
+            </nav>
+
+            {% if user.is_authenticated %}
+            <a href="{% url 'core:dashboard' %}" class="button sign-in">◉ {{ user.first_name|default:user.username|truncatechars:10|upper }}</a>
+            {% else %}
+            <a href="{% url 'core:signin' %}" class="button sign-in">↗ SIGN IN</a>
+            {% endif %}
+        </header>
+
+        {% if left_links %}
+        <aside class="side-panel left-panel">
+            {% for link in left_links %}
+            <a href="{{ link.target }}"{% if link.open_in_new_tab %} target="_blank" rel="noopener"{% endif %}
+               class="{% if request.path == link.target %}active{% endif %}">
+                <span class="side-icon">{{ link.icon }}</span>
+                <span>{{ link.label }}</span>
+            </a>
+            {% endfor %}
+        </aside>
+        {% endif %}
+
+        {% if right_links or social_links %}
+        <aside class="side-panel right-panel">
+            {% for link in right_links %}
+            <a href="{{ link.target }}"{% if link.open_in_new_tab %} target="_blank" rel="noopener"{% endif %}
+               aria-label="{{ link.label }}">
+                <span class="side-icon">{{ link.icon }}</span>
+            </a>
+            {% empty %}
+            {% for social in social_links %}
+            <a href="{{ social.url }}" target="_blank" rel="noopener"
+               aria-label="{{ social.label|default:social.get_network_display }}">
+                <span class="side-icon">{{ social.icon }}</span>
+            </a>
+            {% endfor %}
+            {% endfor %}
+        </aside>
+        {% endif %}
+
+        <main class="content">
+            {% block hero_content %}{% endblock %}
+        </main>
+
+        {% block scroll_indicator %}
+        <div class="scroll-indicator">
+            <span>SCROLL</span>
+            <div class="scroll-line"></div>
+        </div>
+        {% endblock %}
+    </section>
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer">
+        <div class="shell">
+            <div class="footer-grid">
+                <div>
+                    <h4>{{ site.site_name }}</h4>
+                    <p style="color:rgba(255,255,255,.6);font-size:13.5px">
+                        {{ site.footer_tagline|default:site.hero_description }}
+                    </p>
+                    {% if social_links %}
+                    <div class="social-row" style="margin-top:16px">
+                        {% for social in social_links %}
+                        <a href="{{ social.url }}" target="_blank" rel="noopener"
+                           aria-label="{{ social.label|default:social.get_network_display }}">{{ social.icon }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <h4>Explore</h4>
+                    <ul class="footer-links">
+                        {% for link in footer_links %}
+                        <li><a href="{{ link.target }}">{{ link.label }}</a></li>
+                        {% empty %}
+                        {% for p in all_pages|slice:":6" %}
+                        <li><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></li>
+                        {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>Contact</h4>
+                    <ul class="footer-links">
+                        {% if site.contact_email %}<li><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></li>{% endif %}
+                        {% if site.contact_phone %}<li><a href="tel:{{ site.contact_phone }}">{{ site.contact_phone }}</a></li>{% endif %}
+                        {% if site.contact_address %}<li style="color:rgba(255,255,255,.6);font-size:13.5px">{{ site.contact_address|linebreaksbr }}</li>{% endif %}
+                        <li><a href="{% url 'core:contact' %}">Contact form</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4>Account</h4>
+                    <ul class="footer-links">
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'core:dashboard' %}">My dashboard</a></li>
+                        <li><a href="{% url 'core:signout' %}">Sign out</a></li>
+                        {% else %}
+                        <li><a href="{% url 'core:signin' %}">Sign in</a></li>
+                        <li><a href="{% url 'core:signup' %}">Create account</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'core:site_map' %}">Site map</a></li>
+                        {% if DEBUG %}<li><a href="/admin/">Admin</a></li>{% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span>{{ site.footer_copyright }}</span>
+                <span>Crafted for {{ site.organisation|default:"OJUS" }}</span>
+            </div>
+        </div>
+    </footer>
+
+    {% if site.trailer_url %}
+    <div class="modal" id="trailer-modal" role="dialog" aria-modal="true" aria-label="Trailer">
+        <div class="modal-box">
+            <button class="modal-close" type="button" aria-label="Close trailer">&times;</button>
+            <iframe src="{{ site.trailer_url }}" title="Trailer" allowfullscreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        (function () {
+            var modal = document.getElementById('trailer-modal');
+            if (modal) {
+                document.querySelectorAll('[data-trailer]').forEach(function (el) {
+                    el.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        modal.classList.add('open');
+                        document.body.style.overflow = 'hidden';
+                    });
+                });
+                var close = function () {
+                    modal.classList.remove('open');
+                    document.body.style.overflow = '';
+                };
+                modal.querySelector('.modal-close').addEventListener('click', close);
+                modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') close();
+                });
+            }
+            setTimeout(function () {
+                document.querySelectorAll('.message').forEach(function (m) {
+                    m.style.transition = 'opacity .6s ease';
+                    m.style.opacity = '0';
+                    setTimeout(function () { m.remove(); }, 600);
+                });
+            }, 5000);
+        })();
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

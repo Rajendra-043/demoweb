@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}{{ site.site_name }} · {{ page.title }}{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:page.description|default:site.meta_description }}{% endblock %}
+
+{% block hero_variant %}hero--compact{% endblock %}
+
+{% block hero_content %}
+    {% if page.eyebrow %}<p class="eyebrow">{{ page.eyebrow }}</p>{% endif %}
+    <h1 class="title">{{ page.hero_heading }}</h1>
+    {% if page.meta_pair %}
+    <div class="event-meta">
+        {% for meta in page.meta_pair %}<span>{{ meta }}</span>{% endfor %}
+    </div>
+    {% endif %}
+    {% if page.description %}<p class="description">{{ page.description }}</p>{% endif %}
+    {% if page.tagline %}<p class="tagline">{{ page.tagline }}</p>{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+
+    {% if page.hero_image %}
+    <section class="section section--tight">
+        <div class="shell">
+            <img class="detail-hero" src="{{ page.hero_image.url }}" alt="{{ page.title }}">
+        </div>
+    </section>
+    {% endif %}
+
+    {% if page.body %}
+    <section class="section">
+        <div class="shell shell--narrow">
+            <div class="prose">{{ page.body|linebreaks }}</div>
+        </div>
+    </section>
+    {% endif %}
+
+    {% include "core/includes/sections.html" %}
+
+    {% if faqs %}
+    <section class="section section--alt">
+        <div class="shell shell--narrow">
+            <div class="section-head">
+                <span class="section-kicker">FAQ</span>
+                <h2 class="section-title">Questions &amp; Answers</h2>
+            </div>
+            {% for faq in faqs %}
+            <details class="faq-item" {% if forloop.first %}open{% endif %}>
+                <summary>{{ faq.question }}</summary>
+                <div class="faq-answer">{{ faq.answer|linebreaks }}</div>
+            </details>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if not sections and not page.body and not faqs %}
+    <section class="section">
+        <div class="shell">
+            <div class="empty-note">
+                <span>This page is live but has no content yet.</span>
+                <a class="button" href="/admin/core/page/{{ page.pk }}/change/">Add content in the admin</a>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+</div>
+{% endblock %}

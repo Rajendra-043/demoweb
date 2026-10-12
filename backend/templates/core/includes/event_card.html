@@ -1,0 +1,22 @@
+<article class="card">
+    <div class="card-media {% if not event.poster %}card-media--empty{% endif %}">
+        {% if event.poster %}
+        <img src="{{ event.poster.url }}" alt="{{ event.title }}">
+        {% else %}<span>▦</span>{% endif %}
+        {% if event.category %}<span class="card-badge">{{ event.category.name }}</span>{% endif %}
+    </div>
+    <div class="card-body">
+        <h3 class="card-title"><a href="{{ event.get_absolute_url }}">{{ event.title }}</a></h3>
+        {% if event.summary %}<p class="card-text">{{ event.summary|truncatechars:140 }}</p>{% endif %}
+        <div class="card-meta">
+            {% if event.start_at %}<span>◷ {{ event.start_at|date:"D d M · H:i" }}</span>{% endif %}
+            {% if event.venue %}<span>⌖ {{ event.venue }}</span>{% endif %}
+        </div>
+        <div class="card-foot">
+            <a class="button" href="{{ event.get_absolute_url }}">DETAILS</a>
+            {% if event.registration_url %}
+            <a class="button primary-button" href="{{ event.registration_url }}">REGISTER</a>
+            {% endif %}
+        </div>
+    </div>
+</article>

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% comment %}Shared detail-page shell. Override the blocks per model.{% endcomment %}
+
+{% block hero_content %}
+    <a class="back-link" href="{% block back_url %}{% endblock %}">‹ {% block back_label %}Back{% endblock %}</a>
+    {% if object.summary %}<p class="eyebrow">{{ object.summary|truncatechars:90 }}</p>{% endif %}
+    <h1 class="title" style="font-size:clamp(34px,5vw,64px)">{% block object_title %}{{ object.title }}{% endblock %}</h1>
+    {% block object_meta %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+
+    <section class="section">
+        <div class="shell">
+            <div class="detail-wrap">
+
+                <div>
+                    {% if object.image %}<img class="detail-hero" src="{{ object.image.url }}" alt="{{ object.title }}">{% endif %}
+                    {% block object_body %}{% endblock %}
+
+                    {% if related %}
+                    <h2 class="section-title" style="font-size:28px;margin:46px 0 22px">You may also like</h2>
+                    <div class="grid grid--3">
+                        {% for item in related %}
+                        <article class="card card--plain">
+                            <h3 class="card-title"><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></h3>
+                            {% if item.summary %}<p class="card-text">{{ item.summary|truncatechars:120 }}</p>{% endif %}
+                        </article>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <aside class="detail-aside">
+                    {% block object_specs %}{% endblock %}
+                    {% if cta_url %}
+                    <a class="button primary-button" style="width:100%;margin-top:20px" href="{{ cta_url }}">
+                        {{ cta_label }}
+                    </a>
+                    {% endif %}
+                    {% if object.contact_email %}
+                    <a class="button" style="width:100%;margin-top:10px" href="mailto:{{ object.contact_email }}">EMAIL ORGANISER</a>
+                    {% endif %}
+                </aside>
+
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

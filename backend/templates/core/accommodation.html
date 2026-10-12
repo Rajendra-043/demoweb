@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:page.description }}{% endblock %}
+
+{% block hero_content %}
+    {% if page.eyebrow %}<p class="eyebrow">{{ page.eyebrow }}</p>{% endif %}
+    <h1 class="title">{{ page.hero_heading }}</h1>
+    {% if page.meta_pair %}<div class="event-meta">{% for meta in page.meta_pair %}<span>{{ meta }}</span>{% endfor %}</div>{% endif %}
+    {% if page.description %}<p class="description">{{ page.description }}</p>{% endif %}
+    {% if page.tagline %}<p class="tagline">{{ page.tagline }}</p>{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+
+    {% include "core/includes/sections.html" %}
+
+    <section class="section section--tight">
+        <div class="shell">
+            {% if stays %}
+            <div class="grid grid--3">
+                {% for stay in stays %}
+                <article class="card">
+                    <div class="card-media {% if not stay.image %}card-media--empty{% endif %}">
+                        {% if stay.image %}
+                        <img src="{{ stay.image.url }}" alt="{{ stay.name }}">
+                        {% else %}<span>⌂</span>{% endif %}
+                        <span class="card-badge">{{ stay.get_kind_display }}</span>
+                        {% if not stay.is_available %}<span class="card-badge" style="left:auto;right:12px">FULL</span>{% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title"><a href="{{ stay.get_absolute_url }}">{{ stay.name }}</a></h3>
+                        {% if stay.summary %}<p class="card-text">{{ stay.summary|truncatechars:140 }}</p>{% endif %}
+                        <div class="card-meta">
+                            {% if stay.distance_from_campus %}<span>⌖ {{ stay.distance_from_campus }} from campus</span>{% endif %}
+                            {% if stay.capacity %}<span>⛶ {{ stay.capacity }} guests</span>{% endif %}
+                        </div>
+                        {% if stay.price_per_night %}
+                        <div class="card-meta"><span style="color:var(--cyan);font-weight:700">₹ {{ stay.price_per_night }} / night</span></div>
+                        {% endif %}
+                        <div class="card-foot">
+                            <a class="button" href="{{ stay.get_absolute_url }}">DETAILS</a>
+                            {% if stay.booking_url %}
+                            <a class="button primary-button" href="{{ stay.booking_url }}">BOOK</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-note">
+                <span>Accommodation options will appear here once added.</span>
+                <a class="button" href="/admin/core/accommodation/add/">Add accommodation in the admin</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if is_paginated %}{% with page_obj=stays %}{% include "core/includes/pagination.html" %}{% endwith %}{% endif %}
+
+    <section class="section section--alt">
+        <div class="shell">
+            <div class="cta">
+                <h2 class="section-title">Need a custom arrangement?</h2>
+                <p style="color:rgba(255,255,255,.85);max-width:620px;margin:0 auto 22px">
+                    Group bookings, campus stays and travel support — tell us what you need.
+                </p>
+                <a class="button primary-button" href="{% url 'core:contact' %}">TALK TO US</a>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

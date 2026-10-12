@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} · {{ site.site_name }}{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:page.description }}{% endblock %}
+
+{% block hero_content %}
+    {% if page.eyebrow %}<p class="eyebrow">{{ page.eyebrow }}</p>{% endif %}
+    <h1 class="title">{{ page.hero_heading }}</h1>
+    {% if page.meta_pair %}<div class="event-meta">{% for meta in page.meta_pair %}<span>{{ meta }}</span>{% endfor %}</div>{% endif %}
+    {% if page.description %}<p class="description">{{ page.description }}</p>{% endif %}
+    {% if page.tagline %}<p class="tagline">{{ page.tagline }}</p>{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+    {% include "core/includes/sections.html" %}
+
+    <section class="section section--tight">
+        <div class="shell">
+            {% if events %}
+            <div class="grid grid--3">
+                {% for event in events %}
+                {% include "core/includes/event_card.html" %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-note">
+                <span>The CES showcase is ready for its event lineup.</span>
+                <a class="button" href="/admin/core/event/add/">Add events in the admin</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}{% if query %}Search: {{ query }}{% else %}Search{% endif %} · {{ site.site_name }}{% endblock %}
+
+{% block hero_variant %}{% endblock %}
+{% block scroll_indicator %}{% endblock %}
+
+{% block hero_content %}
+    <p class="eyebrow">{{ site.site_name }}</p>
+    <h1 class="title" style="font-size:clamp(34px,5vw,60px)">Search</h1>
+    <p class="description">{% if query %}Results for &ldquo;{{ query }}&rdquo;{% else %}Find events, workshops, competitions and stays.{% endif %}</p>
+
+    <div style="max-width:520px;margin:26px auto 0">
+        <form method="get" action="{% url 'core:search' %}" style="display:flex;gap:10px">
+            <input type="search" name="q" value="{{ query }}" placeholder="Search the festival&hellip;"
+                   style="flex:1;padding:14px 16px;border-radius:10px;background:rgba(6,9,22,.6);border:1px solid var(--border);color:#fff;font-family:inherit">
+            <button type="submit" class="button primary-button">SEARCH</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+    <section class="section">
+        <div class="shell shell--narrow">
+            {% if query %}
+                {% if results.pages %}
+                <h2 class="section-title" style="font-size:26px;margin-bottom:18px">Pages</h2>
+                <div class="grid grid--2">
+                    {% for p in results.pages %}
+                    <a class="card card--plain" style="text-decoration:none" href="{{ p.get_absolute_url }}">
+                        <h3 class="card-title">{{ p.title }}</h3>
+                        {% if p.description %}<p class="card-text">{{ p.description|truncatechars:120 }}</p>{% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% for label, items in grouped %}
+                <h2 class="section-title" style="font-size:26px;margin:38px 0 18px">{{ label }}</h2>
+                <div class="grid grid--3">
+                    {% for item in items %}
+                    <a class="card card--plain" style="text-decoration:none" href="{{ item.get_absolute_url }}">
+                        <h3 class="card-title">{{ item.title }}</h3>
+                        {% if item.summary %}<p class="card-text">{{ item.summary|truncatechars:110 }}</p>{% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+
+                {% if not results.pages and not results.events and not results.workshops and not results.competitions and not results.stays %}
+                <div class="empty-note"><span>Nothing matched &ldquo;{{ query }}&rdquo;.</span></div>
+                {% endif %}
+            {% else %}
+            <div class="empty-note"><span>Type something above to search the site.</span></div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

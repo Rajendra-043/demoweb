@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site.site_name }}{% endblock %}
+
+{% block hero_variant %}{% endblock %}
+
+{% block hero_content %}
+    {% if page.eyebrow or site.hero_eyebrow %}<p class="eyebrow">{{ page.eyebrow|default:site.hero_eyebrow }}</p>{% endif %}
+
+    <h1 class="title">{{ page.hero_title|default:site.hero_title }}</h1>
+
+    {% if page.meta_pair or site.hero_meta_left or site.hero_meta_right %}
+    <div class="event-meta">
+        {% if page.meta_left %}<span>{{ page.meta_left }}</span>{% elif site.hero_meta_left %}<span>{{ site.hero_meta_left }}</span>{% endif %}
+        {% if page.meta_right %}<span>{{ page.meta_right }}</span>{% elif site.hero_meta_right %}<span>{{ site.hero_meta_right }}</span>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if page.description or site.hero_description %}
+    <p class="description">{{ page.description|default:site.hero_description }}</p>
+    {% endif %}
+
+    {% if page.tagline or site.hero_tagline %}<p class="tagline">{{ page.tagline|default:site.hero_tagline }}</p>{% endif %}
+
+    <div class="actions">
+        <a href="{{ site.primary_button_url|default:'/events/' }}" class="button primary-button">
+            {{ site.primary_button_label }} &nbsp; →
+        </a>
+        {% if site.trailer_url %}
+        <a href="#" class="button" data-trailer>▶ &nbsp; {{ site.secondary_button_label }}</a>
+        {% else %}
+        <a href="{% url 'core:contact' %}" class="button">▶ &nbsp; {{ site.secondary_button_label }}</a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="page-body">
+
+    {% include "core/includes/sections.html" %}
+
+    {% if featured_events %}
+    <section class="section section--alt">
+        <div class="shell">
+            <div class="section-head">
+                <span class="section-kicker">Featured</span>
+                <h2 class="section-title">Highlighted Events</h2>
+                <p class="section-subtitle">A glimpse at what is running on the floor.</p>
+            </div>
+            <div class="grid grid--3">
+                {% for event in featured_events %}
+                {% include "core/includes/event_card.html" %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% else %}
+    <section class="section section--alt">
+        <div class="shell">
+            <div class="section-head">
+                <span class="section-kicker">Featured</span>
+                <h2 class="section-title">Highlighted Events</h2>
+            </div>
+            <div class="empty-note">
+                <span>No events published yet.</span>
+                <a class="button" href="/admin/core/event/add/">Add your first event</a>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if featured_workshops or featured_competitions %}
+    <section class="section">
+        <div class="shell">
+            <div class="section-head">
+                <span class="section-kicker">Programmes</span>
+                <h2 class="section-title">Workshops &amp; Competitions</h2>
+            </div>
+            <div class="grid grid--3">
+                {% for workshop in featured_workshops %}
+                <article class="card">
+                    <div class="card-media {% if not workshop.image %}card-media--empty{% endif %}">
+                        {% if workshop.image %}
+                        <img src="{{ workshop.image.url }}" alt="{{ workshop.title }}">
+                        {% else %}<span>◉</span>{% endif %}
+                        {% if workshop.track %}<span class="card-badge">{{ workshop.track }}</span>{% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title"><a href="{{ workshop.get_absolute_url }}">{{ workshop.title }}</a></h3>
+                        {% if workshop.summary %}<p class="card-text">{{ workshop.summary|truncatechars:130 }}</p>{% endif %}
+                        <div class="card-meta">
+                            {% if workshop.date %}<span>◷ {{ workshop.date }}</span>{% endif %}
+                            {% if workshop.venue %}<span>⌖ {{ workshop.venue }}</span>{% endif %}
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+                {% for competition in featured_competitions %}
+                <article class="card">
+                    <div class="card-media {% if not competition.image %}card-media--empty{% endif %}">
+                        {% if competition.image %}
+                        <img src="{{ competition.image.url }}" alt="{{ competition.title }}">
+                        {% else %}<span>◈</span>{% endif %}
+                        {% if competition.category %}<span class="card-badge">{{ competition.category }}</span>{% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title"><a href="{{ competition.get_absolute_url }}">{{ competition.title }}</a></h3>
+                        {% if competition.summary %}<p class="card-text">{{ competition.summary|truncatechars:130 }}</p>{% endif %}
+                        <div class="card-meta">
+                            {% if competition.deadline %}<span>◷ Deadline {{ competition.deadline }}</span>{% endif %}
+                            {% if competition.prize %}<span>★ {{ competition.prize }}</span>{% endif %}
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if sponsors %}
+    <section class="section section--alt">
+        <div class="shell">
+            <div class="section-head">
+                <span class="section-kicker">Partners</span>
+                <h2 class="section-title">Our Sponsors</h2>
+            </div>
+            <div class="grid grid--4">
+                {% for sponsor in sponsors %}
+                <div class="sponsor-logo">
+                    {% if sponsor.logo %}
+                    <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}">
+                    {% else %}<span style="font-family:Georgia,serif;font-style:italic">{{ sponsor.name }}</span>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="section">
+        <div class="shell">
+            <div class="cta">
+                <h2 class="section-title">Be part of {{ site.site_name }}</h2>
+                <p style="color:rgba(255,255,255,.85);max-width:620px;margin:0 auto 22px">
+                    Registrations, accommodation and volunteering are all coordinated by the
+                    {{ site.organisation|default:"OJUS" }} team.
+                </p>
+                <a class="button primary-button" href="{% url 'core:contact' %}">GET IN TOUCH</a>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
