@@ -16,10 +16,13 @@ SECRET_KEY = os.environ.get(
 )
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
-ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS",
-    "localhost,127.0.0.1"
-).split(",")
+
+ALLOWED_HOSTS = [
+    "demoweb-3em1.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
+
 
 CSRF_TRUSTED_ORIGINS = [
     o.strip()
