@@ -1,5 +1,5 @@
 ﻿"""
-Data model for the OJUS site.
+Data model for the TECNO site.
 
 Design idea
 -----------
@@ -124,14 +124,14 @@ def sponsor_upload_to(instance, filename):
 class SiteSettings(TimeStamped):
     """Singleton row (pk=1) holding everything global to the site."""
 
-    site_name = models.CharField(max_length=120, default="OJUS")
-    logo_text = models.CharField(max_length=40, default="OJUS")
+    site_name = models.CharField(max_length=120, default="TECNO")
+    logo_text = models.CharField(max_length=40, default="TECNO")
     logo_superscript = models.CharField(max_length=10, default="™")
-    organisation = models.CharField(max_length=160, blank=True, default="BIT Durg's")
+    organisation = models.CharField(max_length=160, blank=True, default="My College's")
 
     # Hero (the block in the middle of the landing page)
-    hero_eyebrow = models.CharField(max_length=160, blank=True, default="BIT Durg's")
-    hero_title = models.CharField(max_length=160, default="OJUS")
+    hero_eyebrow = models.CharField(max_length=160, blank=True, default="My College's")
+    hero_title = models.CharField(max_length=160, default="TECNO")
     hero_meta_left = models.CharField(max_length=120, blank=True, default="16th – 18th December")
     hero_meta_right = models.CharField(max_length=120, blank=True, default="30th Edition")
     hero_description = models.CharField(
@@ -141,7 +141,7 @@ class SiteSettings(TimeStamped):
     )
     hero_tagline = models.CharField(max_length=160, blank=True, default="— An Aetherial Renaissance —")
 
-    primary_button_label = models.CharField(max_length=60, default="EXPLORE OJUS")
+    primary_button_label = models.CharField(max_length=60, default="EXPLORE TECNO")
     primary_button_url = models.CharField(max_length=200, blank=True, default="/events/")
     secondary_button_label = models.CharField(max_length=60, default="WATCH TRAILER")
     trailer_url = models.URLField(blank=True, help_text="YouTube / Vimeo link for the trailer modal.")
@@ -160,9 +160,9 @@ class SiteSettings(TimeStamped):
     # Footer
     footer_tagline = models.CharField(max_length=200, blank=True)
     footer_copyright = models.CharField(
-        max_length=200, blank=True, default="© OJUS · BIT Durg. All rights reserved."
+        max_length=200, blank=True, default="© TECNO · My College. All rights reserved."
     )
-    contact_email = models.EmailField(blank=True, default="ojus@bitdurg.ac.in")
+    contact_email = models.EmailField(blank=True, default="tecno@mycollege.edu.in")
     contact_phone = models.CharField(max_length=40, blank=True)
     contact_address = models.TextField(blank=True)
     map_embed_url = models.URLField(blank=True, help_text="Google Maps embed src URL.")

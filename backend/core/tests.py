@@ -18,6 +18,7 @@ from .models import (
     NavigationItem,
     Organiser,
     Page,
+    PageSection,
     Registration,
     SectionItem,
     SiteSettings,
@@ -59,7 +60,7 @@ class StaticFilesTests(TestCase):
 
         self.assertIsNotNone(
             finders.find("css/site.css"),
-            "css/site.css not found - check STATICFILES_DIRS in ojus/settings.py",
+            "css/site.css not found - check STATICFILES_DIRS in tecno/settings.py",
         )
 
     def test_background_image_is_discoverable(self):
@@ -67,7 +68,7 @@ class StaticFilesTests(TestCase):
 
         self.assertIsNotNone(
             finders.find("img/background.jpg"),
-            "img/background.jpg not found - check STATICFILES_DIRS in ojus/settings.py",
+            "img/background.jpg not found - check STATICFILES_DIRS in tecno/settings.py",
         )
 
     def test_css_is_linked_from_the_home_page(self):
@@ -87,6 +88,82 @@ class StaticFilesTests(TestCase):
             settings.BASE_DIR / "static",
             [Path(p).resolve() for p in settings.STATICFILES_DIRS],
         )
+
+
+class ProvisioningTests(TestCase):
+    """
+    Guards the failure that broke the Render deploy.
+
+    The site is driven by database rows, so a fresh/empty database used to make
+    every URL 404. Provisioning now runs as a data migration, and these tests
+    pin the behaviour that makes that work.
+    """
+
+    def test_migrations_create_the_home_page(self):
+        """A migrated-but-empty database must already have pages."""
+        self.assertTrue(Page.objects.filter(slug="home").exists())
+
+    def test_provisioning_created_the_navigation_and_socials(self):
+        self.assertTrue(NavigationItem.objects.filter(position="left").exists())
+        self.assertTrue(NavigationItem.objects.filter(position="header").exists())
+        self.assertTrue(SocialLink.objects.exists())
+        self.assertTrue(SiteSettings.objects.filter(pk=1).exists())
+
+    def test_provisioning_creates_all_expected_slugs(self):
+        for slug in ("home", "events", "ces", "ignite", "workshops",
+                     "competitions", "accommodation", "about", "contact",
+                     "requirements"):
+            with self.subTest(slug=slug):
+                self.assertTrue(Page.objects.filter(slug=slug).exists())
+
+    def test_no_slug_was_left_empty(self):
+        """Regression: historical models skip save(), so slugs must be explicit."""
+        self.assertFalse(Page.objects.filter(slug="").exists())
+        self.assertFalse(EventCategory.objects.filter(slug="").exists())
+        self.assertFalse(Event.objects.filter(slug="").exists())
+
+    def test_event_category_slugs_are_populated(self):
+        for name in ("Keynote", "Exhibition", "Workshop", "Performance"):
+            with self.subTest(name=name):
+                category = EventCategory.objects.get(name=name)
+                self.assertTrue(category.slug)
+
+    def test_provisioning_is_idempotent(self):
+        from core.seeding import provision_site
+
+        before_pages = Page.objects.count()
+        before_sections = PageSection.objects.count()
+        provision_site()
+        provision_site()
+        self.assertEqual(Page.objects.count(), before_pages)
+        self.assertEqual(PageSection.objects.count(), before_sections)
+
+    def test_home_survives_a_missing_page_row(self):
+        """home() must degrade, not 404, if the home row is deleted."""
+        Page.objects.filter(slug="home").delete()
+        response = self.client.get(reverse("core:home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["needs_provisioning"])
+
+    def test_unique_slug_helper_avoids_collisions(self):
+        from core.seeding import unique_slug
+
+        # "keynote" is already taken by the provisioned category.
+        first = unique_slug(EventCategory, "Keynote")
+        self.assertEqual(first, "keynote-2")
+        EventCategory.objects.create(name="Keynote Clone", slug=first)
+        second = unique_slug(EventCategory, "Keynote")
+        self.assertNotEqual(first, second)
+
+    def test_reseeding_does_not_duplicate_pages(self):
+        """Regression: re-provisioning must not spawn "-2" slugs."""
+        from core.seeding import provision_site
+
+        slugs_before = sorted(Page.objects.values_list("slug", flat=True))
+        provision_site()
+        provision_site()
+        self.assertEqual(sorted(Page.objects.values_list("slug", flat=True)), slugs_before)
+        self.assertFalse(Page.objects.filter(slug__endswith="-2").exists())
 
 
 class PageTests(TestCase):
@@ -142,7 +219,7 @@ class PageTests(TestCase):
     def test_home_page(self):
         response = self.client.get(reverse("core:home"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "OJUS")
+        self.assertContains(response, "TECNO")
         self.assertContains(response, "background.jpg")
 
     def test_every_seeded_page_renders(self):
@@ -248,7 +325,7 @@ class PageTests(TestCase):
 
         response = self.client.post(
             reverse("core:register"),
-            {"full_name": "Asha R", "email": "asha@example.com", "interest": "workshop", "college": "BIT Durg"},
+            {"full_name": "Asha R", "email": "asha@example.com", "interest": "workshop", "college": "My College"},
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Registration.objects.count(), 1)

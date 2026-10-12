@@ -1,9 +1,9 @@
-# OJUS — Django site
+# TECNO — Django site
 
-Backend for the OJUS festival site, built from the original cinematic glass
+Backend for the TECNO festival site, built from the original cinematic glass
 HTML design in `../fontend/page/index.html`.
 
-Organisation: **BIT Durg**. Fest: **OJUS**.
+Organisation: **My College**. Fest: **TECNO**.
 
 ---
 
@@ -11,8 +11,9 @@ Organisation: **BIT Durg**. Fest: **OJUS**.
 
 ```powershell
 cd backend
+python -m pip install -r requirements.txt
 python manage.py migrate
-python manage.py seed_site
+python manage.py seed_site      # optional: migrate already provisions the defaults
 python manage.py createsuperuser
 python manage.py runserver
 ```
@@ -88,7 +89,7 @@ the alpha values in that rule.
 
 ```
 backend/
-  ojus/                 project settings, root urls
+  tecno/                 project settings, root urls
   core/
     models.py           SiteSettings, Page, PageSection, SectionItem,
                         Event, Workshop, Competition, Accommodation,
@@ -105,7 +106,7 @@ backend/
     core/               one template per page type + shared includes
   static/css/site.css   the full design system
   static/img/background.jpg
-fontend/page/index.html  original standalone mock-up (OJUS branding, same photo)
+fontend/page/index.html  original standalone mock-up (TECNO branding, same photo)
 ```
 
 ### Adding a new page
@@ -127,12 +128,43 @@ Add a choice to `PageSection.Layout`, then add a branch in
 
 ## Notes
 
-* SQLite by default. For Postgres set `DATABASES` in `ojus/settings.py`.
+* SQLite by default. For Postgres set `DATABASES` in `tecno/settings.py`.
 * `DEBUG=1` and `ALLOWED_HOSTS` come from env vars:
   `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_SECRET_KEY`,
   `DJANGO_CSRF_TRUSTED_ORIGINS`.
 * Uploaded media goes to `backend/media/`.
 * Email is printed to the console in development
   (`EMAIL_BACKEND = console`), so nothing is sent from localhost.
-* Before deploying: set a real `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=0`, run
-  `python manage.py collectstatic`, and serve with a real WSGI server.
+
+---
+
+## Deploying (Render)
+
+**Why this section exists:** the site is driven by database rows, so a fresh
+deployment with an empty database once 404'd on every URL. `manage.py migrate`
+now provisions the default pages, navigation and social links automatically
+(`core/migrations/0003_provision_default_pages.py`), so a new dyno comes up
+working with no manual step.
+
+Set these environment variables in Render:
+
+| Variable | Value |
+|---|---|
+| `DJANGO_SECRET_KEY` | a long random string |
+| `DJANGO_DEBUG` | `0` |
+| `DJANGO_ALLOWED_HOSTS` | your domain(s). Defaults to `*` so a new host isn't blocked; lock it down. |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | `https://yourdomain.com`. Defaults include `https://*.onrender.com` so POST forms work. |
+
+Build command: `bash build.sh` · Start command: `bash render.yaml`
+(gunicorn). Then run `python manage.py createsuperuser` in the Render shell.
+
+**Use Postgres.** SQLite on Render is ephemeral — it resets on every redeploy
+and scales to one instance. Set `DATABASES["default"]` to the Render Postgres
+URL (or add `dj-database-url`) and attach a disk only if you must stay on
+SQLite.
+
+### Why `ALLOWED_HOSTS` defaults to `*`
+Django rejects unknown `Host` headers with `DisallowedHost` (HTTP 400). A
+deployed host name is not known until the first request, so the permissive
+default prevents an immediate "site is down" — set `DJANGO_ALLOWED_HOSTS`
+explicitly for a public launch.

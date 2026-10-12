@@ -20,7 +20,7 @@ from core.seeding import provision_site
 
 
 class Command(BaseCommand):
-    help = "Create the initial OJUS site structure (pages, navigation, settings)."
+    help = "Create the initial TECNO site structure (pages, navigation, settings)."
 
     def add_arguments(self, parser):
         parser.add_argument(

@@ -247,6 +247,6 @@ class RegistrationAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at",)
 
 
-admin.site.site_header = "OJUS administration"
-admin.site.site_title = "OJUS admin"
-admin.site.index_title = "Manage OJUS content"
+admin.site.site_header = "TECNO administration"
+admin.site.site_title = "TECNO admin"
+admin.site.index_title = "Manage TECNO content"

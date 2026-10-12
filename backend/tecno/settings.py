@@ -1,8 +1,18 @@
 ﻿"""
-Django settings for the ojus project.
+Django settings for the tecno project.
 
 Run:  python manage.py runserver
 Admin: http://127.0.0.1:8000/admin/
+
+Deployment (Render or similar) is driven entirely by environment variables:
+
+    DJANGO_SECRET_KEY        a long random string
+    DJANGO_DEBUG             0 in production
+    DJANGO_ALLOWED_HOSTS     comma separated; defaults to "*"
+    DJANGO_CSRF_TRUSTED_ORIGINS
+                             comma separated origins; defaults to localhost +
+                             https://*.onrender.com so POST forms work on a
+                             Render deployment out of the box
 """
 
 import os
@@ -17,16 +27,22 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
+# Defaults to "*" because a deployed host name (e.g. your Render subdomain) is
+# not known until the first request; without this every production request
+# fails with DisallowedHost (HTTP 400). Lock it down by setting
+# DJANGO_ALLOWED_HOSTS to your real domains.
 ALLOWED_HOSTS = [
-    "demoweb-3em1.onrender.com",
-    "localhost",
-    "127.0.0.1",
+    h.strip()
+    for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
+    if h.strip()
 ]
-
 
 CSRF_TRUSTED_ORIGINS = [
     o.strip()
-    for o in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "http://127.0.0.1:8000,http://localhost:8000").split(",")
+    for o in os.environ.get(
+        "DJANGO_CSRF_TRUSTED_ORIGINS",
+        "http://127.0.0.1:8000,http://localhost:8000,https://*.onrender.com",
+    ).split(",")
     if o.strip()
 ]
 
@@ -53,7 +69,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "ojus.urls"
+ROOT_URLCONF = "tecno.urls"
 
 TEMPLATES = [
     {
@@ -71,8 +87,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "ojus.wsgi.application"
-ASGI_APPLICATION = "ojus.asgi.application"
+WSGI_APPLICATION = "tecno.wsgi.application"
+ASGI_APPLICATION = "tecno.asgi.application"
 
 DATABASES = {
     "default": {

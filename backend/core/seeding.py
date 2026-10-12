@@ -15,6 +15,8 @@ Only string literals are used for choice values (never ``Page.Template.HOME``)
 so this stays valid when models are frozen in time by a migration.
 """
 
+from django.utils.text import slugify
+
 HEADER = "header"
 LEFT = "left"
 FOOTER = "footer"
@@ -24,8 +26,8 @@ PAGE_SEED = [
         "slug": "home",
         "title": "Home",
         "template": "home",
-        "eyebrow": "BIT Durg's",
-        "hero_title": "OJUS",
+        "eyebrow": "My College's",
+        "hero_title": "TECNO",
         "meta_left": "16th – 18th December",
         "meta_right": "30th Edition",
         "description": "ASIA'S LARGEST SCIENCE & TECHNOLOGY FESTIVAL",
@@ -34,14 +36,14 @@ PAGE_SEED = [
         "order": 0,
         "sections": [
             {
-                "title": "What is OJUS",
+                "title": "What is TECNO",
                 "kicker": "The festival",
                 "subtitle": "Three days of talks, builds, contests and experiments.",
                 "layout": "text",
                 "body": (
-                    "OJUS is the annual science and technology festival of BIT Durg. "
+                    "TECNO is the annual science and technology festival of My College. "
                     "Replace this paragraph with your own introduction — it lives in the admin "
-                    "under Pages › Home › What is OJUS."
+                    "under Pages › Home › What is TECNO."
                 ),
             },
             {
@@ -109,7 +111,7 @@ PAGE_SEED = [
         "template": "ces",
         "eyebrow": "Showcase",
         "hero_title": "CES",
-        "description": "The OJUS showcase floor — exhibits, demos and product launches.",
+        "description": "The TECNO showcase floor — exhibits, demos and product launches.",
         "show_in_side_panel": True,
         "order": 2,
     },
@@ -149,7 +151,7 @@ PAGE_SEED = [
         "template": "accommodation",
         "eyebrow": "Stay",
         "hero_title": "Accommodation",
-        "description": "Hostels, hotels and camps near the BIT Durg campus.",
+        "description": "Hostels, hotels and camps near the My College campus.",
         "show_in_header": True,
         "order": 6,
     },
@@ -163,7 +165,7 @@ PAGE_SEED = [
         "show_in_side_panel": True,
         "order": 7,
         "body": (
-            "OJUS is run entirely by students of BIT Durg. Replace this text with your "
+            "TECNO is run entirely by students of My College. Replace this text with your "
             "own history, mission and vision — edit it under Pages › About Us."
         ),
     },
@@ -281,6 +283,24 @@ SOCIAL_SEED = [
 EVENT_CATEGORIES = ["Keynote", "Exhibition", "Workshop", "Performance"]
 
 
+def unique_slug(model, value):
+    """
+    Build a collision-free slug for a model.
+
+    Slugs must be computed explicitly here rather than left to the model's
+    ``save()``: Django's migration machinery renders *historical* models
+    (``__fake__.Foo``) without custom ``save()`` overrides, so any slug
+    generated there would silently be inserted as an empty string and then
+    blow up the UNIQUE constraint on the second row.
+    """
+    base = slugify(value) or "item"
+    slug, i = base, 2
+    while model._default_manager.filter(slug=slug).exists():
+        slug = f"{base}-{i}"
+        i += 1
+    return slug
+
+
 def provision_site(apps=None, log=None):
     """
     Create the default site structure. Idempotent: safe to call repeatedly.
@@ -315,34 +335,45 @@ def provision_site(apps=None, log=None):
         emit("✓ Site settings created")
 
     # --- pages + their sections ------------------------------------------
+    # Strictly create-if-missing: re-running this (or running it against a
+    # database you have already customised) must never overwrite your edits or
+    # spawn "-2" duplicates.
     pages = {}
     for spec in PAGE_SEED:
         spec = dict(spec)
         sections = spec.pop("sections", [])
-        page, created = Page.objects.update_or_create(slug=spec["slug"], defaults=spec)
+        wanted_slug = spec.pop("slug")
+
+        page = Page.objects.filter(slug=wanted_slug).first()
+        if page is None:
+            # The slug is the lookup key and we just proved it is free, so it
+            # is safe to assign directly - and it must be explicit, because
+            # historical models in migrations do not run save().
+            page = Page.objects.create(slug=wanted_slug, **spec)
+            emit(f"✓ Page: {page.title}")
+        else:
+            emit(f"· Page: {page.title} (exists, left untouched)")
         pages[page.slug] = page
-        emit(f"{'✓' if created else '·'} Page: {page.title}")
 
         for order, section_spec in enumerate(sections):
             section_spec = dict(section_spec)
             items = section_spec.pop("items", [])
-            section, _ = PageSection.objects.update_or_create(
+            section, created = PageSection.objects.get_or_create(
                 page=page,
                 title=section_spec["title"],
                 defaults={**section_spec, "order": order},
             )
             for i, item in enumerate(items):
-                SectionItem.objects.update_or_create(
+                SectionItem.objects.get_or_create(
                     section=section,
                     order=i,
-                    title=item.get("title", ""),
                     defaults=dict(item),
                 )
 
     # --- navigation -------------------------------------------------------
     for order, (position, label, target, icon) in enumerate(NAV_SEED):
         page = pages.get(target)
-        NavigationItem.objects.update_or_create(
+        NavigationItem.objects.get_or_create(
             label=label,
             position=position,
             defaults={
@@ -356,14 +387,23 @@ def provision_site(apps=None, log=None):
 
     # --- socials ----------------------------------------------------------
     for order, (network, url, icon) in enumerate(SOCIAL_SEED):
-        SocialLink.objects.update_or_create(
+        SocialLink.objects.get_or_create(
             network=network, defaults={"url": url, "icon": icon, "order": order}
         )
     emit(f"✓ {SocialLink.objects.count()} social links ready")
 
     # --- small reference data --------------------------------------------
     for i, name in enumerate(EVENT_CATEGORIES):
-        EventCategory.objects.get_or_create(name=name, defaults={"order": i})
+        category = EventCategory.objects.filter(name=name).first()
+        if category is None:
+            EventCategory.objects.create(
+                name=name, order=i, slug=unique_slug(EventCategory, name)
+            )
+        elif not category.slug:
+            # Legacy row saved before slugs were generated.
+            EventCategory.objects.filter(pk=category.pk).update(
+                slug=unique_slug(EventCategory, name)
+            )
 
     if not Organiser.objects.exists():
         Organiser.objects.create(
