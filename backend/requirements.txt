@@ -5,3 +5,4 @@ Django>=5.2,<7.0
 # raises fields.E210 ("Cannot use ImageField because Pillow is not
 # installed") for all 11 image fields if this is missing.
 Pillow>=10.0
+gunicorn
